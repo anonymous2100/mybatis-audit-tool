@@ -30,7 +30,8 @@ public class ObjectToTableUtil
 		boolean flag = checkTableExist(tableName);
 		if (flag)
 		{
-			log.info("{}对应的审计表已经存在！", sourceObject);
+			log.info("{}对应的审计表已经存在！", sourceObject.getClass()
+					.getSimpleName());
 			return null;
 		}
 
@@ -53,7 +54,7 @@ public class ObjectToTableUtil
 			JDBCUtil jdbcUtil = JDBCUtil.getInstance();
 			jdbcUtil.getConnection();
 			jdbcUtil.updateByPreparedStatement(deleteTableSql, null);
-			log.info("执行建表语句{}：\n\n", deleteTableSql);
+			// log.info("执行建表语句{}：\n\n", deleteTableSql);
 
 			// 拼接并执行建表sql语句2
 			StringBuffer createSB = new StringBuffer();
@@ -93,7 +94,7 @@ public class ObjectToTableUtil
 
 			jdbcUtil.updateByPreparedStatement(createSql, null);
 			jdbcUtil.releaseConn();
-			log.info("执行建表语句{}：\n\n", createSql);
+			// log.info("执行建表语句{}：\n\n", createSql);
 
 			return deleteTableSql + createSql;
 		}

@@ -36,8 +36,7 @@ public class User implements Serializable
 
 	private Date updateTime;
 
-	private Byte isDelete;
-	
+	private Integer isDelete;
 
 	public Integer getId()
 	{
@@ -169,12 +168,12 @@ public class User implements Serializable
 		this.updateTime = updateTime;
 	}
 
-	public Byte getIsDelete()
+	public Integer getIsDelete()
 	{
 		return isDelete;
 	}
 
-	public void setIsDelete(Byte isDelete)
+	public void setIsDelete(Integer isDelete)
 	{
 		this.isDelete = isDelete;
 	}

@@ -8,6 +8,11 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @ClassName: ReflectionUtil
+ * @Description: 类反射工具
+ * @author lh2
+ */
 public class ReflectionUtil
 {
 	private static final Logger log = LoggerFactory.getLogger(ReflectionUtil.class);

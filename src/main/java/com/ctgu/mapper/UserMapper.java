@@ -21,5 +21,5 @@ public interface UserMapper
 
 	User getUserInfoById(Integer id);
 
-	// User insertUser(Integer id, String userName);
+	int deleteUser(User user);
 }

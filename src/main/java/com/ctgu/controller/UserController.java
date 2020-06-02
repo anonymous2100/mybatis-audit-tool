@@ -19,6 +19,12 @@ import com.ctgu.vo.UserInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+/**
+ * @ClassName: UserController
+ * @Description: 测试接口
+ * @author lh2
+ * @date 2020年6月2日 下午3:05:19
+ */
 @Controller
 @RequestMapping("/user")
 @Api(value = "/user", tags = "用户相关操作")

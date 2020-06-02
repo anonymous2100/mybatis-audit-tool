@@ -39,7 +39,6 @@
 
 	<!-- 拦截器配置 -->
 	<plugins>
-
 		<plugin interceptor="com.ctgu.audit.AuditLogInterceptor">
 			<!-- <property name="" value="" /> -->
 		</plugin>

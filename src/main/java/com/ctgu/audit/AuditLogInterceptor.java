@@ -1,7 +1,11 @@
 package com.ctgu.audit;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Map.Entry;
 
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -13,10 +17,12 @@ import org.apache.ibatis.plugin.Plugin;
 import org.apache.ibatis.plugin.Signature;
 
 import com.ctgu.audit.annotation.Audited;
+import com.ctgu.util.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
 /**
+ * 使用Mybatis拦截器实现数据审计<br>
  * 默认情况下，MyBatis 允许使用插件来拦截的方法调用包括：<br>
  * Executor (update, query, flushStatements, commit, rollback, getTransaction, close, isClosed)<br>
  * ParameterHandler (getParameterObject, setParameters)<br>
@@ -41,9 +47,11 @@ public class AuditLogInterceptor implements Interceptor
 	@Override
 	public Object intercept(Invocation invocation) throws Throwable
 	{
-		Object target = invocation.getTarget();
-		Method method = invocation.getMethod();
-		Object[] args = invocation.getArgs();
+		// 获取当前用户ID
+		// SysUser token = (SysUser) SecurityUtils.getSubject().getPrincipal();
+		Object target = invocation.getTarget();// 被代理对象
+		Method method = invocation.getMethod();// 代理方法
+		Object[] args = invocation.getArgs();// 方法参数
 
 		MappedStatement mappedStatement = (MappedStatement) args[0];
 		Object targetObject = args[1];
@@ -56,25 +64,29 @@ public class AuditLogInterceptor implements Interceptor
 		}
 
 		Object result = null;
-		SqlCommandType type = mappedStatement.getSqlCommandType();
-		switch (type)
+		String typeName = mappedStatement.getSqlCommandType()
+				.name();
+		if ("insert".equalsIgnoreCase(typeName))
 		{
-			case INSERT:
-				doAudit(targetObject, OperationType.getName(0));
-				result = invocation.proceed();
-			case UPDATE:
-				result = invocation.proceed();
-				doAudit(targetObject, OperationType.getName(1));
-				break;
-			case DELETE:
-				doAudit(targetObject, OperationType.getName(2));
-				result = invocation.proceed();
-				break;
-			default:
-				// 执行真正的操作
-				result = invocation.proceed();
-				break;
+			doAudit(targetObject, OperationType.getName(0));
+			result = invocation.proceed();
 		}
+		else if ("update".equalsIgnoreCase(typeName))
+		{
+			result = invocation.proceed();
+			doAudit(targetObject, OperationType.getName(1));
+		}
+		else if ("delete".equalsIgnoreCase(typeName))
+		{
+			doAudit(targetObject, OperationType.getName(2));
+			result = invocation.proceed();
+		}
+		else
+		{
+			// 执行真正的操作
+			result = invocation.proceed();
+		}
+
 		return result;
 	}
 
@@ -83,12 +95,17 @@ public class AuditLogInterceptor implements Interceptor
 	 */
 	private void doAudit(Object targetObject, String operationType) throws Exception
 	{
+		// 自动建立审计表
 		String sql = ObjectToTableUtil.checkAndCreateTable(targetObject);
 		if (sql != null)
 		{
 			log.info("{}对应的审计表不存在，自动建表过程已被执行", targetObject.getClass()
 					.getSimpleName());
 		}
+		log.info("{}对应的审计表已存在，即将插入审计数据...", targetObject.getClass()
+				.getSimpleName());
+
+		// 上面的自动建表过程也可以关掉，改成自己手动建表，自动建表，数据类型大小等不一定合适
 
 		doDB(targetObject, operationType);
 	}
@@ -100,20 +117,77 @@ public class AuditLogInterceptor implements Interceptor
 	{
 		String tableName = ObjectToTableUtil.getTableName(targetObject);
 
-		String tableSql = "insert into %s ";
-		String fieldSql = "(xx  ,version, operation_type, operator_id, operator_name, operation_time) ";
-		String valueSql = "values(xx,  1, operationType, 0, null , new Date())";
+		StringBuffer sb = new StringBuffer();
+		sb.append("insert into ")
+				.append(tableName)
+				.append("(");
+		// 字段声明
+		Map<String, Object> propertyMap = ReflectionUtil.getAllPropertiesMap(targetObject);
+		for (Entry<String, Object> entry : propertyMap.entrySet())
+		{
+			Object key = entry.getKey();
+			Object value = entry.getValue();
+			log.info("key={}, value={}", key, value);
+			String columnName = StringUtils.camelToUnderline((String) key);
+			sb.append(columnName)
+					.append(",");
+		}
+		// 操作时间让Mysql自动设置
+		sb.append("version, operation_type, operator_id, operator_name)");
 
+		// 属性值占位符声明
+		sb.append("values(");
+		for (Entry<String, Object> entry : propertyMap.entrySet())
+		{
+			Object key = entry.getKey();
+			Object value = entry.getValue();
+			sb.append(" ? ")
+					.append(",");
+		}
+		sb.append(" ? , ? , ? , ? );");
+		String sql = sb.toString();
+		// log.info("生成的sql语句为\n\n {} \n\n", sql);
+
+		// 设置sql占位符对应的参数
+		List<Object> params = new ArrayList<>();
+		for (Entry<String, Object> entry : propertyMap.entrySet())
+		{
+			Object key = entry.getKey();
+			Object value = entry.getValue();
+			sb.append("?")
+					.append(",");
+			Object columnValue = ReflectionUtil.getFieldValueByFieldName(targetObject, (String) key);
+			params.add(columnValue);
+		}
+		// 版本号，这里的版本号应该是递增的，暂时放到后续版本去优化
+		params.add("1");
+		// 操作类型
+		params.add(operationType);
+		// 操作人id，即是谁改了数据，后续版本优化
+		params.add("1");
+		// 操作人名称，后续版本优化
+		params.add("admin");
+		// 操作时间不用设置
+
+		JDBCUtil jdbcUtil = JDBCUtil.getInstance();
+		jdbcUtil.getConnection();
+		jdbcUtil.updateByPreparedStatement(sql, params);
+		jdbcUtil.releaseConn();
+		// log.info("执行建表语句\n\n {} \n\n", sql);
 	}
 
-	// plugin方法用于某些处理器(Handler)的构建过程
+	/**
+	 * plugin方法用于某些处理器(Handler)的构建过程
+	 */
 	@Override
 	public Object plugin(Object target)
 	{
 		return Plugin.wrap(target, this);
 	}
 
-	// setProperties方法用于拦截器属性的设置。
+	/**
+	 * setProperties方法用于拦截器属性的设置。
+	 */
 	@Override
 	public void setProperties(Properties properties)
 	{

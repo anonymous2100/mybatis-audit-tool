@@ -8,13 +8,21 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @ClassName: JDBCUtil
+ * @Description: JDBC工具类
+ * @author lh2
+ */
 @Slf4j
 public class JDBCUtil
 {
@@ -97,8 +105,10 @@ public class JDBCUtil
 	 * @return 执行结果
 	 * @throws SQLException
 	 */
-	public boolean updateByPreparedStatement(String sql, List<?> params) throws SQLException
+	public boolean updateByPreparedStatement(String sql, List<Object> params) throws SQLException
 	{
+		printRealSql(sql, params); // 打印真实 SQL 的函数
+
 		boolean flag = false;
 		int result = -1;// 表示当用户执行添加删除和修改的时候所影响数据库的行数
 		pstmt = connection.prepareStatement(sql);
@@ -111,6 +121,7 @@ public class JDBCUtil
 				pstmt.setObject(index++, params.get(i));
 			}
 		}
+
 		result = pstmt.executeUpdate();
 		flag = result > 0 ? true : false;
 		return flag;
@@ -157,6 +168,84 @@ public class JDBCUtil
 			list.add(map);
 		}
 		return list;
+	}
+
+	/**
+	 * 在开发过程，SQL语句有可能写错，如果能把运行时出错的 SQL 语句直接打印出来，那对排错非常方便， 因为其可以直接拷贝到数据库客户端进行调试。
+	 * 
+	 * @param sql
+	 *            SQL 语句，可以带有 ? 的占位符
+	 * @param params
+	 *            插入到 SQL 中的参数，可单个可多个可不填
+	 * @return 实际 sql 语句
+	 */
+	public String printRealSql(String sql, List<Object> list)
+	{
+		Object[] params = list.toArray();
+
+		if (params == null || params.length == 0)
+		{
+			log.info("PreparedStatement最终执行的SQL 语句为------------>\n {} \n", sql);
+
+			return sql;
+		}
+
+		if (!match(sql, params))
+		{
+			log.info("SQL 语句中的占位符与参数个数不匹配。SQL：{}", sql);
+			return null;
+		}
+
+		int cols = params.length;
+		Object[] values = new Object[cols];
+		System.arraycopy(params, 0, values, 0, cols);
+
+		for (int i = 0; i < cols; i++)
+		{
+			Object value = values[i];
+			if (value instanceof Date)
+			{
+				values[i] = "'" + value + "'";
+			}
+			else if (value instanceof String)
+			{
+				values[i] = "'" + value + "'";
+			}
+			else if (value instanceof Boolean)
+			{
+				values[i] = (Boolean) value ? 1 : 0;
+			}
+		}
+		String statementSql = String.format(sql.replaceAll("\\?", "%s"), values);
+
+		log.info("PreparedStatement最终执行的SQL 语句为------------>\n\n {} \n", statementSql);
+
+		return statementSql;
+	}
+
+	/**
+	 * ? 和参数的实际个数是否匹配
+	 * 
+	 * @param sql
+	 *            SQL 语句，可以带有 ? 的占位符
+	 * @param params
+	 *            插入到 SQL 中的参数，可单个可多个可不填
+	 * @return true 表示为 ? 和参数的实际个数匹配
+	 */
+	private static boolean match(String sql, Object[] params)
+	{
+		if (params == null || params.length == 0)
+			return true; // 没有参数，完整输出
+
+		Matcher m = Pattern.compile("(\\?)")
+				.matcher(sql);
+		int count = 0;
+		while (m.find())
+		{
+			count++;
+		}
+
+		return count == params.length;
 	}
 
 	/**

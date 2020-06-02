@@ -25,4 +25,22 @@ public class UserServiceImpl implements IUserService
 		userMapper.insert(user);
 	}
 
+	@Override
+	public void updateUser(User user)
+	{
+		userMapper.updateByPrimaryKeySelective(user);
+	}
+
+	@Override
+	public void deleteUserById(Integer id)
+	{
+		userMapper.deleteByPrimaryKey(id);
+	}
+
+	@Override
+	public void deleteUser(User user)
+	{
+		userMapper.deleteUser(user);
+	}
+
 }

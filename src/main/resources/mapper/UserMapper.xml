@@ -243,11 +243,11 @@
 		and id=#{id}
 	</select>
 
-<!-- 	<insert id="insertUser" parameterType="com.ctgu.entity.User">
-		insert into
-		t_user(username)
-		values ( #{userName} )
-	</insert> -->
+	<delete id="deleteUser" parameterType="com.ctgu.entity.User">
+		delete from t_user
+		where
+		id= #{id,jdbcType=INTEGER}
+	</delete>
 
 
 

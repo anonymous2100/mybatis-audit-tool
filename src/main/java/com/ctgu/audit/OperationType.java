@@ -1,5 +1,10 @@
 package com.ctgu.audit;
 
+/**
+ * @ClassName: OperationType
+ * @Description: 数据库操作类型：新增，修改，删除
+ * @author lh2
+ */
 public enum OperationType
 {
 	ADD(0, "新增"),  //
