@@ -72,18 +72,19 @@ public class JacksonUtil
 	/**
 	 * json字符串转换为map
 	 */
-	public static <T> Map<String, T> json2map(String jsonString, Class<T> clazz) throws Exception
-	{
-		Map<String, Map<String, Object>> map = OBJECT_MAPPER.readValue(jsonString, new TypeReference<Map<String, T>>()
-		{
-		});
-		Map<String, T> result = new HashMap<String, T>();
-		for (Map.Entry<String, Map<String, Object>> entry : map.entrySet())
-		{
-			result.put(entry.getKey(), map2pojo(entry.getValue(), clazz));
-		}
-		return result;
-	}
+	// public static Map<String, Object> json2map(String jsonString, Class<?> clazz) throws Exception
+	// {
+	// Map<String, Map<String, Object>> map = OBJECT_MAPPER.readValue(jsonString,
+	// new TypeReference<Map<String, Object>>()
+	// {
+	// });
+	// Map<String, Object> result = new HashMap<String, Object>();
+	// for (Map.Entry<String, Map<String, Object>> entry : map.entrySet())
+	// {
+	// result.put(entry.getKey(), map2pojo(entry.getValue(), clazz));
+	// }
+	// return result;
+	// }
 
 	/**
 	 * 深度转换json成map
@@ -123,7 +124,8 @@ public class JacksonUtil
 				{
 					obj = json2ListRecursion(str, mapper);
 				}
-				else if (obj.toString().startsWith("{"))
+				else if (obj.toString()
+						.startsWith("{"))
 				{
 					obj = json2MapRecursion(str, mapper);
 				}
@@ -196,7 +198,8 @@ public class JacksonUtil
 	 */
 	public static JavaType getCollectionType(Class<?> collectionClass, Class<?>... elementClasses)
 	{
-		return OBJECT_MAPPER.getTypeFactory().constructParametricType(collectionClass, elementClasses);
+		return OBJECT_MAPPER.getTypeFactory()
+				.constructParametricType(collectionClass, elementClasses);
 	}
 
 	/**
