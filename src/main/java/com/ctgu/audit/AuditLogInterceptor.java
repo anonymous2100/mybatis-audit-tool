@@ -17,6 +17,7 @@ import org.apache.ibatis.plugin.Plugin;
 import org.apache.ibatis.plugin.Signature;
 
 import com.ctgu.audit.annotation.Audited;
+import com.ctgu.entity.User;
 import com.ctgu.util.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -95,7 +96,8 @@ public class AuditLogInterceptor implements Interceptor
 	 */
 	private void doAudit(Object targetObject, String operationType) throws Exception
 	{
-		// 自动建立审计表
+		// 1、检查并自动建审计表
+		// 可以注释掉这段代码，改成自己手动建表
 		String sql = ObjectToTableUtil.checkAndCreateTable(targetObject);
 		if (sql != null)
 		{
@@ -105,8 +107,7 @@ public class AuditLogInterceptor implements Interceptor
 		log.info("{}对应的审计表已存在，即将插入审计数据...", targetObject.getClass()
 				.getSimpleName());
 
-		// 上面的自动建表过程也可以关掉，改成自己手动建表，自动建表，数据类型大小等不一定合适
-
+		// 2、数据入库
 		doDB(targetObject, operationType);
 	}
 
@@ -146,7 +147,6 @@ public class AuditLogInterceptor implements Interceptor
 		}
 		sb.append(" ? , ? , ? , ? );");
 		String sql = sb.toString();
-		// log.info("生成的sql语句为\n\n {} \n\n", sql);
 
 		// 设置sql占位符对应的参数
 		List<Object> params = new ArrayList<>();
@@ -159,21 +159,21 @@ public class AuditLogInterceptor implements Interceptor
 			Object columnValue = ReflectionUtil.getFieldValueByFieldName(targetObject, (String) key);
 			params.add(columnValue);
 		}
-		// 版本号，这里的版本号应该是递增的，暂时放到后续版本去优化
-		params.add("1");
-		// 操作类型
-		params.add(operationType);
-		// 操作人id，即是谁改了数据，后续版本优化
-		params.add("1");
-		// 操作人名称，后续版本优化
-		params.add("admin");
+		// User user=getUsers(token);
+		// params.add(generateVersionNumber(user));
+		// params.add(user.getId());
+		// params.add(user.getUserName());
+
+		params.add("1");		// 版本号，这里的版本号应该是递增的
+		params.add(operationType);		// 操作类型
+		params.add("1");// 操作人id，即是谁改了数据
+		params.add("admin");		// 操作人名称
 		// 操作时间不用设置
 
 		JDBCUtil jdbcUtil = JDBCUtil.getInstance();
 		jdbcUtil.getConnection();
 		jdbcUtil.updateByPreparedStatement(sql, params);
 		jdbcUtil.releaseConn();
-		// log.info("执行建表语句\n\n {} \n\n", sql);
 	}
 
 	/**

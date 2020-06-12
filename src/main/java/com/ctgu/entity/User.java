@@ -5,7 +5,13 @@ import java.util.Date;
 
 import com.ctgu.audit.annotation.Audited;
 
-@Audited
+/**
+ * @ClassName: User
+ * @Description:
+ * @author lh2
+ * @date 2020年6月12日 下午5:46:54
+ */
+@Audited // 加了注解才能审计
 public class User implements Serializable
 {
 	private static final long serialVersionUID = -2087523555348653244L;

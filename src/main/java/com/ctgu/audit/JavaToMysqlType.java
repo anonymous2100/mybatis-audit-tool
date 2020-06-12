@@ -4,8 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @version:1.0
+ * @ClassName: JavaToMysqlType
  * @Description: mysql数据类型与java类型转换
+ * @author lh2
+ * @date 2020年6月12日 下午5:44:41
  */
 public class JavaToMysqlType
 {

@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
  * @ClassName: ReflectionUtil
  * @Description: 类反射工具
  * @author lh2
+ * @date 2020年6月12日 下午5:46:24
  */
 public class ReflectionUtil
 {

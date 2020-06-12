@@ -3,7 +3,7 @@
        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
 <generatorConfiguration>
-	<!-- 数据库驱动:换成你本地的驱动包位置 -->
+	<!-- 数据库驱动:换成本地的驱动包位置 -->
 	<classPathEntry
 		location="D:\7_Repository\mysql\mysql-connector-java\8.0.15\mysql-connector-java-8.0.15.jar" />
 

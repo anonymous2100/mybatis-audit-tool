@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 	<!--应用名称 -->
-	<contextName>department-service</contextName>
+	<contextName>mybatis-audit-tool</contextName>
 
 	<!-- 文件输出格式 -->
 	<property name="PATTERN"
@@ -34,11 +34,11 @@
 		<appender name="TEST-FILE"
 			class="ch.qos.logback.core.rolling.RollingFileAppender">
 			<!-- 文件路径 -->
-			<file>${TEST_FILE_PATH}/department-service.log</file>
+			<file>${TEST_FILE_PATH}/mybatis-audit-tool.log</file>
 			<rollingPolicy
 				class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 				<!-- 文件名称 -->
-				<fileNamePattern>${TEST_FILE_PATH}/department-service.%d{yyyy-MM-dd}.log
+				<fileNamePattern>${TEST_FILE_PATH}/mybatis-audit-tool.%d{yyyy-MM-dd}.log
 				</fileNamePattern>
 				<!-- 文件最大保存历史数量 -->
 				<MaxHistory>100</MaxHistory>
@@ -62,10 +62,10 @@
 	<springProfile name="prod">
 		<appender name="PROD_FILE"
 			class="ch.qos.logback.core.rolling.RollingFileAppender">
-			<file>${PRD_FILE_PATH}/department-service.log</file>
+			<file>${PRD_FILE_PATH}/mybatis-audit-tool.log</file>
 			<rollingPolicy
 				class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-				<fileNamePattern>${PRD_FILE_PATH}/department-service.%d{yyyy-MM-dd}.log
+				<fileNamePattern>${PRD_FILE_PATH}/mybatis-audit-tool.%d{yyyy-MM-dd}.log
 				</fileNamePattern>
 				<MaxHistory>100</MaxHistory>
 			</rollingPolicy>

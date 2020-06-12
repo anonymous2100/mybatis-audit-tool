@@ -4,6 +4,7 @@ package com.ctgu.audit;
  * @ClassName: OperationType
  * @Description: 数据库操作类型：新增，修改，删除
  * @author lh2
+ * @date 2020年6月12日 下午5:46:05
  */
 public enum OperationType
 {

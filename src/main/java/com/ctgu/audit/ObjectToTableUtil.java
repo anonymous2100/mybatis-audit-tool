@@ -12,7 +12,10 @@ import com.ctgu.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 根据java对象名自动创建审计表的工具类
+ * @ClassName: ObjectToTableUtil
+ * @Description: 根据java对象名自动创建审计表的工具类
+ * @author lh2
+ * @date 2020年6月12日 下午5:45:50
  */
 @Slf4j
 public class ObjectToTableUtil
@@ -54,7 +57,6 @@ public class ObjectToTableUtil
 			JDBCUtil jdbcUtil = JDBCUtil.getInstance();
 			jdbcUtil.getConnection();
 			jdbcUtil.updateByPreparedStatement(deleteTableSql, null);
-			// log.info("执行建表语句{}：\n\n", deleteTableSql);
 
 			// 拼接并执行建表sql语句2
 			StringBuffer createSB = new StringBuffer();
@@ -94,7 +96,6 @@ public class ObjectToTableUtil
 
 			jdbcUtil.updateByPreparedStatement(createSql, null);
 			jdbcUtil.releaseConn();
-			// log.info("执行建表语句{}：\n\n", createSql);
 
 			return deleteTableSql + createSql;
 		}

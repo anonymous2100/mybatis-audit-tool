@@ -52,6 +52,7 @@ public class ApplicationTest
 	@Test
 	public void test3()
 	{
+		//以下删除方法审计会失效，因为传参是Integer，不是加了注解的类
 		// userService.deleteUserById(520);
 
 		// 删除的时候必须传对象类型（添加注解的那个类，这里是User）的参数，不能是int,Integer等类型

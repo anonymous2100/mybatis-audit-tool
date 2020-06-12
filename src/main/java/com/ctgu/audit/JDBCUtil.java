@@ -20,8 +20,9 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * @ClassName: JDBCUtil
- * @Description: JDBC工具类
+ * @Description:JDBC工具类
  * @author lh2
+ * @date 2020年6月12日 下午5:44:54
  */
 @Slf4j
 public class JDBCUtil
